@@ -1,4 +1,4 @@
-import {Injectable, InternalServerErrorException, Logger} from '@nestjs/common';
+import {BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException} from '@nestjs/common';
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
 import {InjectRepository} from "@nestjs/typeorm";
@@ -16,27 +16,63 @@ export class ProductsService {
 
     async create(createProductDto: CreateProductDto) {
         try {
+            // if (!createProductDto.slug) createProductDto.slug = createProductDto.title.toLowerCase().replaceAll(' ', '_').replaceAll("'", '')
             const product = this.productRepository.create(createProductDto)
             return await this.productRepository.save(product);
         } catch (e) {
-            this.logger.error(e.detail || e.message);
-            throw new InternalServerErrorException('Ayuda');
+            this.handleExceptions(e)
         }
     }
 
-    findAll() {
-        return `This action returns all products`;
+    async findAll(limit: number = 10, skip: number = 0) {
+        try {
+            return await this.productRepository.find({
+                skip,
+                take: limit
+            });
+        } catch (e) {
+            this.handleExceptions(e)
+        }
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} product`;
+    async findOne(id: string) {
+        try {
+            return await this.productRepository.findOneBy({
+                id
+            })
+        } catch (e) {
+            this.handleExceptions(e)
+        }
     }
 
-    update(id: number, updateProductDto: UpdateProductDto) {
-        return `This action updates a #${id} product`;
+    async update(id: string, updateProductDto: UpdateProductDto) {
+        try {
+            return await this.productRepository.update({
+                id
+            }, updateProductDto)
+        } catch (e) {
+            this.handleExceptions(e)
+        }
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} product`;
+    async remove(id: string) {
+        try {
+            const product = await this.findOne(id)
+            if (!product){
+                throw new NotFoundException('No se encontro registro con el id: ', id)
+            }
+
+            return await this.productRepository.remove(product)
+        } catch (e) {
+            this.handleExceptions(e)
+        }
+    }
+
+    private handleExceptions(error: any) {
+        if (['23505'].includes(error.code)) {
+            throw new BadRequestException(error.detail)
+        }
+        this.logger.error(error.detail || error.message);
+        throw new InternalServerErrorException('Unexpected error, check server logs')
     }
 }
