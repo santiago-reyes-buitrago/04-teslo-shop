@@ -1,7 +1,8 @@
 import {BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException} from '@nestjs/common';
+import {InjectRepository} from "@nestjs/typeorm";
+import {validate as isUUID} from 'uuid';
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
-import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {Product} from "./entities/product.entity";
 
@@ -35,30 +36,40 @@ export class ProductsService {
         }
     }
 
-    async findOne(id: string) {
+    async findOne(term: string) {
         try {
-            return await this.productRepository.findOneBy({
-                id
-            })
+            if (isUUID(term)){
+                return await this.productRepository.findOneBy({
+                    id: term
+                })
+            }
+            const queryBuilder =  this.productRepository.createQueryBuilder()
+            return await queryBuilder.where(`title = LOWER(:title) or slug = LOWER(:slug)`,{
+                title: term,slug: term
+            }).getOne()
         } catch (e) {
             this.handleExceptions(e)
         }
     }
 
     async update(id: string, updateProductDto: UpdateProductDto) {
-        try {
-            return await this.productRepository.update({
-                id
-            }, updateProductDto)
-        } catch (e) {
-            this.handleExceptions(e)
-        }
+        // try {
+        //
+        // } catch (e) {
+        //     this.handleExceptions(e)
+        // }
+        const product = await this.productRepository.preload({
+            id,
+            ...updateProductDto
+        })
+        if (!product) throw new NotFoundException(`Product with id ${id} not found`)
+        return this.productRepository.save(product)
     }
 
     async remove(id: string) {
         try {
             const product = await this.findOne(id)
-            if (!product){
+            if (!product) {
                 throw new NotFoundException('No se encontro registro con el id: ', id)
             }
 
