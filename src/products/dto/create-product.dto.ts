@@ -24,4 +24,8 @@ export class CreateProductDto {
     @IsArray()
     @IsString({each: true})
     sizes: string[]
+
+    @IsArray()
+    @IsString({each: true})
+    tags: string[]
 }

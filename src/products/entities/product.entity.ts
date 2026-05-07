@@ -33,6 +33,13 @@ export class Product {
     })
     sizes: string[]
 
+    @Column({
+        type: 'text',
+        array: true,
+        default: []
+    })
+    tags: string[]
+
 
     @BeforeInsert()
     checkSlugInsert() {
