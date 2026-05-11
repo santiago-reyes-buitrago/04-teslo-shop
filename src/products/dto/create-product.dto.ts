@@ -29,9 +29,14 @@ export class CreateProductDto {
     @IsString({each: true})
     tags: string[]
 
+    @IsString()
+    @IsOptional()
+    gender: string;
+
     @IsArray()
     @IsString({each: true})
     @IsOptional()
     images?: string[]
+
 
 }

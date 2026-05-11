@@ -41,8 +41,14 @@ export class Product {
     })
     tags: string[]
 
+    @Column({
+        type: 'text',
+        default: 'N/A'
+    })
+    gender: string;
+
     @OneToMany(() => ProductImages, (images) => images.product, {
-        cascade: true,
+        cascade: true,eager: true
     })
     images: ProductImages[]
 
