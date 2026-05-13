@@ -4,8 +4,7 @@ import {validate as isUUID} from 'uuid';
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
 import {DataSource, Repository} from "typeorm";
-import {Product} from "./entities/product.entity";
-import {ProductImages} from "./entities";
+import {ProductImage,Product} from "./entities";
 
 @Injectable()
 export class ProductsService {
@@ -15,8 +14,8 @@ export class ProductsService {
     constructor(
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
-        @InjectRepository(ProductImages)
-        private readonly productImagesRepository: Repository<ProductImages>,
+        @InjectRepository(ProductImage)
+        private readonly productImagesRepository: Repository<ProductImage>,
         private readonly dataSource: DataSource,
     ) {
     }
@@ -154,7 +153,7 @@ export class ProductsService {
 
             if (images) {
 
-                await queryRunner.manager.delete(ProductImages, {
+                await queryRunner.manager.delete(ProductImage, {
                     product: {id},
                 });
 
