@@ -5,6 +5,7 @@ import {User} from "./entities/user.entity";
 import {CreateUserDto} from "./dto/create-user.dto";
 import * as bcrypt from 'bcrypt'
 import {LoginAuthDto} from "./dto/login-auth.dto";
+import {JwtPayload} from "./interfaces/jwt-payload.interface";
 
 @Injectable()
 export class AuthService {
@@ -27,13 +28,21 @@ export class AuthService {
   async login(loginAuthDto: LoginAuthDto) {
     try {
       const {email,password} = loginAuthDto;
-      const user = await this.userRepository.findOne({where: {email}})
+      const user = await this.userRepository.findOne({where: {email},select: {email: true,password: true}})
       if (!user) throw new NotFoundException('No se encontro el usuario');
-      const isPasswordValid = bcrypt.compareSync(password, user.password);
-      return isPasswordValid ? user : null;
+      return bcrypt.compareSync(password, user.password)
     }catch (e) {
       this.logger.error(e.message);
       throw new InternalServerErrorException('Error executing login');
+    }
+  }
+
+  async validateUser(payload: JwtPayload){
+    try {
+
+    }catch (e) {
+      this.logger.error(e.message);
+      throw new InternalServerErrorException('Error executing validation');
     }
   }
 }
