@@ -1,0 +1,1 @@
+export const validatePropertyObject = <T extends Object>(object: T,propertyObject: string[]) => Object.keys(object).some(key => propertyObject.includes(key));
