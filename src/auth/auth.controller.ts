@@ -4,8 +4,10 @@ import { AuthService } from './auth.service';
 import {CreateUserDto} from "./dto/create-user.dto";
 import {LoginAuthDto} from "./dto/login-auth.dto";
 import {GetUserDecorator} from "./decorators/get-user.decorator";
-import {GetRawHeadersDecorator} from "./decorators/get-raw-headers.decorator";
+import {GetRawHeadersDecorator} from "../common/decorators/get-raw-headers.decorator";
 import {User} from "./entities/user.entity";
+import {ValidateRole} from "./decorators/validate-role.decorator";
+import {ValidateRoleGuard} from "./guards/validate-role.guard";
 
 
 
@@ -30,6 +32,22 @@ export class AuthController {
   testingPrivateRoute(
       // @Req() request: Express.Request
       @GetUserDecorator('email') user: User,
+      @GetRawHeadersDecorator() headers: string[]
+  ){
+    // console.log({user: request.user})
+    return {
+      ok: true,
+      msg: 'ruta privada',
+      user,
+      headers
+    }
+  }
+  @Get('private2')
+  @ValidateRole('admin')
+  @UseGuards(AuthGuard(),ValidateRoleGuard)
+  testingPrivateRoute2(
+      // @Req() request: Express.Request
+      @GetUserDecorator(['email','roles']) user: User,
       @GetRawHeadersDecorator() headers: string[]
   ){
     // console.log({user: request.user})
