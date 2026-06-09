@@ -7,10 +7,16 @@ const createUser = (user: Express.User,keys: string[]|null) => {
   return BuildObjectDinamicFunction<Express.User>(user,keys)
 }
 
+const cleanKeys = (keys: string[]|string) => {
+  if (!keys || keys.length === 0) return null
+  if (!Array.isArray(keys)) return [keys];
+  return keys.filter(key => key !== 'password')
+}
+
 export const GetUserDecorator = createParamDecorator(
     (data: string[]|string, context: ExecutionContext) => {
       const request: Express.Request = context.switchToHttp().getRequest()
       const {user} = request
-      return createUser(user!, Array.isArray(data) ? data : [data])
+      return createUser(user!, cleanKeys(data))
     }
 )

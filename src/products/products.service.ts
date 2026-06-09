@@ -5,6 +5,7 @@ import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
 import {DataSource, Repository} from "typeorm";
 import {ProductImage,Product} from "./entities";
+import {User} from "../auth/entities/user.entity";
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +21,7 @@ export class ProductsService {
     ) {
     }
 
-    async create(createProductDto: CreateProductDto) {
+    async create(createProductDto: CreateProductDto,user: User) {
 
         try {
 
@@ -29,7 +30,7 @@ export class ProductsService {
             const product = this.productRepository.create({
 
                 ...productDetails,
-
+                user,
                 images: images.map(image =>
                     this.productImagesRepository.create({
                         url: image,
@@ -129,12 +130,13 @@ export class ProductsService {
 
     }
 
-    async update(id: string, updateProductDto: UpdateProductDto) {
+    async update(id: string, updateProductDto: UpdateProductDto,user: User) {
 
         const {images, ...updateData} = updateProductDto;
 
         const product = await this.productRepository.preload({
             id,
+            user,
             ...updateData,
         });
 

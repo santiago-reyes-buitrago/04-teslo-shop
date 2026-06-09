@@ -16,6 +16,10 @@ export class SeedService {
 
     }
 
+    private async deleteAllTablesDB() {
+        await this.productService.deleteAllProducts()
+    }
+
     private async populateDB() {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();

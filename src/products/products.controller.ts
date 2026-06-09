@@ -1,9 +1,11 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query} from '@nestjs/common';
 import {ProductsService} from './products.service';
 import {CreateProductDto} from './dto/create-product.dto';
 import {UpdateProductDto} from './dto/update-product.dto';
 import {PaginationDto} from "../common/dtos/pagination.dto";
-import {Auth} from "../auth/decorators";
+import {Auth, GetUserDecorator} from "../auth/decorators";
+import {ValidRole} from "../auth/enum/valid-role.enum";
+import {User} from "../auth/entities/user.entity";
 
 @Controller('products')
 @Auth()
@@ -12,8 +14,9 @@ export class ProductsController {
     }
 
     @Post()
-    create(@Body() createProductDto: CreateProductDto) {
-        return this.productsService.create(createProductDto);
+    // @Auth(ValidRole.ADMIN)
+    create(@Body() createProductDto: CreateProductDto,@GetUserDecorator() user: User) {
+        return this.productsService.create(createProductDto,user);
     }
 
     @Get()
@@ -27,11 +30,13 @@ export class ProductsController {
     }
 
     @Patch(':id')
-    update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
-        return this.productsService.update(id, updateProductDto);
+    @Auth(ValidRole.ADMIN)
+    update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto,@GetUserDecorator() user: User) {
+        return this.productsService.update(id, updateProductDto,user);
     }
 
     @Delete(':id')
+    @Auth(ValidRole.ADMIN)
     remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.productsService.remove(id);
     }
