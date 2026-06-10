@@ -19,8 +19,7 @@ export class AuthService {
 
   async signUp(createUserDto: CreateUserDto) {
     try {
-      const user = await this.create(createUserDto as SeedUserDto);
-      return this.userRepository.save(user)
+      return await this.create(createUserDto);
     }catch (e) {
       this.logger.error(e.message);
       throw new InternalServerErrorException('Error executing signUp');
@@ -53,7 +52,7 @@ export class AuthService {
     }
   }
 
-  async create(createUserDto: SeedUserDto){
+  async create(createUserDto: SeedUserDto|CreateUserDto){
     try {
       const user = this.userRepository.create({...createUserDto, password: bcrypt.hashSync(createUserDto.password, 12)});
       return this.userRepository.save(user)
