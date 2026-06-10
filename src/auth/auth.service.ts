@@ -2,7 +2,7 @@ import {BadRequestException, Injectable, InternalServerErrorException, Logger, N
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
-import {CreateUserDto} from "./dto/create-user.dto";
+import {CreateUserDto, SeedUserDto} from "./dto/create-user.dto";
 import * as bcrypt from 'bcrypt'
 import {LoginAuthDto} from "./dto/login-auth.dto";
 import {JwtPayload} from "./interfaces/jwt-payload.interface";
@@ -17,9 +17,9 @@ export class AuthService {
       private readonly jwtService: JwtService
   ) {}
 
-  signUp(createUserDto: CreateUserDto) {
+  async signUp(createUserDto: CreateUserDto) {
     try {
-      const user = this.userRepository.create({...createUserDto, password: bcrypt.hashSync(createUserDto.password, 12)});
+      const user = await this.create(createUserDto as SeedUserDto);
       return this.userRepository.save(user)
     }catch (e) {
       this.logger.error(e.message);
@@ -50,6 +50,25 @@ export class AuthService {
     }catch (e) {
       this.logger.error(e.message);
       throw new InternalServerErrorException('Error executing validation');
+    }
+  }
+
+  async create(createUserDto: SeedUserDto){
+    try {
+      const user = this.userRepository.create({...createUserDto, password: bcrypt.hashSync(createUserDto.password, 12)});
+      return this.userRepository.save(user)
+    }catch (e) {
+      this.logger.error(e.message);
+      throw new InternalServerErrorException('Error executing create');
+    }
+  }
+
+  async deleteAllUsers() {
+    const queryRunner = this.userRepository.createQueryBuilder('user');
+    try {
+      return await queryRunner.delete().where({}).execute();
+    }catch (err) {
+      this.logger.error(err.message);
     }
   }
 

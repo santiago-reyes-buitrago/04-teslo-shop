@@ -1,4 +1,5 @@
 import {IsEmail, IsString, Matches, MaxLength, MinLength} from "class-validator";
+import {ValidRole} from "../enum/valid-role.enum";
 
 export class CreateUserDto {
   @IsString()
@@ -15,4 +16,9 @@ export class CreateUserDto {
   @IsString()
   @MinLength(1)
   fullName: string;
+}
+
+
+export class SeedUserDto extends CreateUserDto {
+  role: ValidRole[];
 }

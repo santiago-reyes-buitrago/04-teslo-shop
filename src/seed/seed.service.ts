@@ -2,12 +2,14 @@ import {Injectable} from '@nestjs/common';
 import {ProductsService} from "../products/products.service";
 import {DataSource} from "typeorm";
 import {initialData} from "./data/initialData";
+import {AuthService} from "../auth/auth.service";
 
 @Injectable()
 export class SeedService {
     constructor(
         private readonly dataSource: DataSource,
-        private readonly productService: ProductsService
+        private readonly productService: ProductsService,
+        private readonly userService: AuthService
     ) {
     }
 
@@ -17,7 +19,16 @@ export class SeedService {
     }
 
     private async deleteAllTablesDB() {
-        await this.productService.deleteAllProducts()
+        return Promise.all([
+            this.productService.deleteAllProducts(),
+            this.userService.deleteAllUsers()
+
+        ])
+    }
+
+    private async insertUsers() {
+        const users = await Promise.all(initialData.users.map(user => this.userService.create(user)))
+        return users[0];
     }
 
     private async populateDB() {
@@ -25,8 +36,9 @@ export class SeedService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            await this.productService.deleteAllProducts()
-            await Promise.all(initialData.products.map(product => this.productService.create(product)))
+            await this.deleteAllTablesDB();
+            const user = await this.insertUsers();
+            await Promise.all(initialData.products.map(product => this.productService.create(product,user)))
             // for (const product of initialData.products) {
             //     await this.productService.create(product)
             // }
