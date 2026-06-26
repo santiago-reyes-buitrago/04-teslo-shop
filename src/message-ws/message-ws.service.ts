@@ -16,7 +16,9 @@ export class MessageWsService {
   }
 
 
-  getConnectedClients() {
-    return Object.keys(this.clients).length ?? 0;
+  getConnectedClients(length?: boolean): string[]|number {
+    const ids = Object.keys(this.clients) ?? [];
+    if (length) return ids.length;
+    return ids;
   }
 }
