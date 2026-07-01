@@ -5,12 +5,13 @@ import {
 } from '@nestjs/websockets';
 import {MessageWsService} from './message-ws.service';
 import {Server, Socket} from "socket.io";
-import {EVENT_TYPE_LISTEN,EVENT_TYPE_EMIT} from "./enums";
+import {EVENT_TYPE_LISTEN, EVENT_TYPE_EMIT} from "./enums";
 import {NewMessageDto} from "./dto/new-message.dto";
 
 @WebSocketGateway({cors: true})
 export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() wss: Server
+
   constructor(private readonly messageWsService: MessageWsService) {
   }
 
@@ -24,9 +25,18 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.messageWsService.removeClient(client.id)
   }
 
-  @SubscribeMessage(EVENT_TYPE_EMIT.MESSAGE_FROM_CLIENT)
-  handleMessageFromClient(client: Socket, payload: NewMessageDto){
-    console.log(client.id, payload)
+  @SubscribeMessage(EVENT_TYPE_LISTEN.MESSAGE_FROM_CLIENT)
+  handleMessageFromClient(client: Socket, payload: NewMessageDto) {
+    // client.broadcast.emit(EVENT_TYPE_EMIT.MESSAGE_FROM_SERVER, {
+    //   msg: payload.message
+    // })
 
+    // client.emit(EVENT_TYPE_EMIT.MESSAGE_FROM_SERVER, {
+    //   msg: payload.message
+    // })
+
+    this.wss.emit(EVENT_TYPE_EMIT.MESSAGE_FROM_SERVER, {
+      msg: payload.message
+    })
   }
 }
