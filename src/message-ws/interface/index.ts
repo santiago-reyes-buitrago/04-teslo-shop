@@ -1,5 +1,5 @@
 import {Socket} from "socket.io";
 
-export interface ClientData {
-  [id: string]: Socket
+export interface ClientData<T> {
+  [id: string]: { socket: Socket, information: T }
 }
