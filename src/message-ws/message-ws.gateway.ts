@@ -53,6 +53,7 @@ export class MessageWsGateway implements OnGatewayConnection, OnGatewayDisconnec
     // })
 
     this.wss.emit(EVENT_TYPE_EMIT.MESSAGE_FROM_SERVER, {
+      fullname: this.messageWsService.getUserFullName(client.id),
       msg: payload.message
     })
   }
